@@ -14,7 +14,7 @@ Setup:
   * user: postgres
   * password: root 
   * Create database 'peixe'
-  * execute ddl from peixe.sql
+  * execute ddl from /backend/src/main/resources/peixe.sql
 
 * Backend:
   * execute 'mvn clean install' on the project on Eclipse or command line
