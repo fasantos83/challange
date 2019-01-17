@@ -12,6 +12,28 @@ public class BuyOption {
 	private Long quantityCupom;
 	private Date startDate;
 	private Date endDate;
+	private Long dealId;
+
+	public BuyOption() {
+		this(null, "", 0D, 0D, 0D, 0L, new Date(), new Date(), 1L);
+	}
+
+	public BuyOption(Long id, String title, Double normalPrice, Double salePrice, Double percentageDiscount, Long quantityCupom, Date startDate, Date endDate, Long dealId) {
+		super();
+		setId(id);
+		setTitle(title);
+		setNormalPrice(normalPrice);
+		setSalePrice(salePrice);
+		setPercentageDiscount(percentageDiscount);
+		setQuantityCupom(quantityCupom);
+		setStartDate(startDate);
+		setEndDate(endDate);
+		setDealId(dealId);
+	}
+
+	public Long getDealId() {
+		return dealId;
+	}
 
 	public Date getEndDate() {
 		return endDate;
@@ -43,6 +65,10 @@ public class BuyOption {
 
 	public String getTitle() {
 		return title;
+	}
+
+	public void setDealId(Long dealId) {
+		this.dealId = dealId;
 	}
 
 	public void setEndDate(Date endDate) {
@@ -79,7 +105,7 @@ public class BuyOption {
 
 	@Override
 	public String toString() {
-		return "BuyOption [id=" + id + ", title=" + title + ", normalPrice=" + normalPrice + ", salePrice=" + salePrice + ", percentageDiscount=" + percentageDiscount + ", quantityCupom="
-				+ quantityCupom + ", startDate=" + startDate + ", endDate=" + endDate + "]";
+		return "BuyOption [id=" + getId() + ", title=" + getTitle() + ", normalPrice=" + getNormalPrice() + ", salePrice=" + getSalePrice() + ", percentageDiscount=" + getPercentageDiscount()
+				+ ", quantityCupom=" + getQuantityCupom() + ", startDate=" + getStartDate() + ", endDate=" + getEndDate() + "]";
 	}
 }

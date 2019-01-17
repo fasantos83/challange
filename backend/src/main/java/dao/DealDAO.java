@@ -16,8 +16,7 @@ public class DealDAO extends DAO {
 		String sql = "DELETE FROM deal WHERE id = ?";
 		int affectedRows = 0;
 		try (Connection con = getConnection(); PreparedStatement pstmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);) {
-			int i = 1;
-			pstmt.setString(i++, id);
+			pstmt.setLong(1, Long.parseLong(id));
 
 			affectedRows = pstmt.executeUpdate();
 			if (affectedRows == 0) {
@@ -34,9 +33,10 @@ public class DealDAO extends DAO {
 		Deal deal = new Deal();
 		try (Connection con = getConnection(); PreparedStatement pstmt = con.prepareStatement(sql);) {
 			pstmt.setLong(1, Long.parseLong(id));
-			ResultSet rs = pstmt.executeQuery();
-			while (rs.next()) {
-				deal = getDeal(rs);
+			try (ResultSet rs = pstmt.executeQuery();) {
+				while (rs.next()) {
+					deal = getDeal(rs);
+				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

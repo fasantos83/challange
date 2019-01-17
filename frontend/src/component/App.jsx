@@ -1,6 +1,7 @@
 import React from "react";
 import "./App.css";
-import DealList from "./DealList";
+import Deal from "./Deal";
+import 'antd/dist/antd.css';
 
 class App extends React.Component {
   constructor(props) {
@@ -12,7 +13,7 @@ class App extends React.Component {
   render() {
     return (
       <div className="component-app">
-        <DealList/>
+        <Deal />
       </div>
     );
   }

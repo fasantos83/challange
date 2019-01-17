@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "deal")
@@ -15,11 +16,16 @@ public class Deal {
 	private Long id;
 	private String title;
 	private String text;
+	@XmlElement(name = "create_date")
 	private Date createDate;
+	@XmlElement(name = "publish_date")
 	private Date publishDate;
+	@XmlElement(name = "end_date")
 	private Date endDate;
 	private String url;
+	@XmlElement(name = "total_sold")
 	private Long totalSold;
+	@XmlElement(name = "deal_type_id")
 	private Long dealTypeId;
 	private List<BuyOption> listBuyOption;
 
