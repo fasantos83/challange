@@ -1,4 +1,4 @@
-# Desafio 
+# Desafio Desenvolvedor
 ## Tecnologias usadas
 * Backend
   * Java 8
@@ -15,7 +15,7 @@
   * user: postgres
   * password: root 
   * criar database 'peixe'
-  * executar ddl contida em /backend/src/main/resources/peixe.sql
+  * executar ddl contida em /backend/src/main/resources/challenge.sql
 
 * Backend:
   * executar 'mvn clean install'
