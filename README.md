@@ -33,4 +33,5 @@
 
 ## Melhorias que eu gostaria de implementar
 * Adicionar testes unitários no projeto backend
+* Adicionar validações adicionais em campos dos formulários
 * Melhorar organização do projeto frontend em componentes diferentes
