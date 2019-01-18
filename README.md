@@ -1,26 +1,27 @@
-# challange
-Tecnologies used:
-* Java 8
-* PostgreSQL 11
-* Tomcat 9
-* Maven
-
-* node.js 10
-* react
-* axios
+# Desafio 
+Tecnologias usadas
+* Backend
+  * Java 8
+  * PostgreSQL 11
+  * Tomcat 9
+  * Maven
+* Frontend:
+  * node.js 10
+  * react 16
+  * axios
 
 Setup:
 * BD:
   * user: postgres
   * password: root 
-  * Create database 'peixe'
-  * execute ddl from /backend/src/main/resources/peixe.sql
+  * criar database 'peixe'
+  * executar ddl contida em /backend/src/main/resources/peixe.sql
 
 * Backend:
-  * execute 'mvn clean install' on the project on Eclipse or command line
-  * add project to Apache 9 and run
+  * executa 'mvn clean install'
+  * adicionar projeto no Apache 9 e subir container
 
 * Frontend:
-  * execute 'npm install' on the 'frontend' project folder
-  * execute 'npm start'
-  * access http://localhost:3000
+  * executar 'npm install'
+  * executar 'npm start'
+  * acessar http://localhost:3000 se browser não abrir automaticamente
