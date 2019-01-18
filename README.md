@@ -1,26 +1,36 @@
-# challange
-Tecnologies used:
-* Java 8
-* PostgreSQL 11
-* Tomcat 9
-* Maven
+# Desafio 
+## Tecnologias usadas
+* Backend
+  * Java 8
+  * PostgreSQL 11
+  * Tomcat 9
+  * Maven
+* Frontend:
+  * node.js 10
+  * react 16
+  * axios
 
-* node.js 10
-* react
-* axios
-
-Setup:
+## Setup:
 * BD:
   * user: postgres
   * password: root 
-  * Create database 'peixe'
-  * execute ddl from /backend/src/main/resources/peixe.sql
+  * criar database 'peixe'
+  * executar ddl contida em /backend/src/main/resources/peixe.sql
 
 * Backend:
-  * execute 'mvn clean install' on the project on Eclipse or command line
-  * add project to Apache 9 and run
+  * executar 'mvn clean install'
+  * adicionar projeto no Apache 9 e subir container
 
 * Frontend:
-  * execute 'npm install' on the 'frontend' project folder
-  * execute 'npm start'
-  * access http://localhost:3000
+  * executar 'npm install'
+  * executar 'npm start'
+  * acessar http://localhost:3000 se browser não abrir automaticamente
+
+## Uso do sistema
+* Tela principal lista todas as ofertas cadastradas em uma lista e oferece as opções de criação (botão no cabeçalho do card) e edição e deleção (linha da tabela)
+* Ao clicar no icone (+) na parte esquerda da linha da tabela de ofertas um card interno contendo a lista de opções de compra cadastrada com as mesmas opções de CRUD do card de Ofertas com a adição do botão de compra.
+* Criação, Edição e Compra de Opções de ofertas são realizadas em modais próprios.
+
+## Melhorias que eu gostaria de implementar
+* Adicionar testes unitários no projeto backend
+* Melhorar organização do projeto frontend em componentes diferentes
