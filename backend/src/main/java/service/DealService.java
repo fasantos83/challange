@@ -34,7 +34,6 @@ public class DealService {
 	@POST
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Deal insert(Deal deal) {
-		System.out.println("INSERT: " + deal.toString());
 		return DealDAO.insert(deal);
 	}
 
@@ -48,7 +47,6 @@ public class DealService {
 	@PUT
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Deal update(Deal deal) {
-		System.out.println("UPDATE: " + deal.toString());
 		return DealDAO.update(deal);
 	}
 }

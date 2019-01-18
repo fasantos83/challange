@@ -1,29 +1,23 @@
 import React from 'react';
 import axios from 'axios';
-import { Card, Table, Divider, Button, Modal, Form, Input, Radio, Popconfirm, message  } from 'antd';
+import { Card, Table, Divider, Button, Popconfirm, message, Modal, Form, Input, Radio, InputNumber, Row, Col } from 'antd';
+import { MODE, dealUrl, buyOptionUrl } from './constants';
 
-const dealUrl = "http://localhost:8080/backend/rest/deal/";
-
-const MODE = {
-  INSERT: "insert",
-  UPDATE: "update",
-  DELETE: "delete"
-};
-
-const DealForm = Form.create({ name: 'deal_insert_modal' })(
+const DealForm = Form.create({ name: 'deal_modal' })(
   // eslint-disable-next-line
   class extends React.Component {
     render() {
       const {
-        visible, onCancel, onCreate, form
+        visible, onCancel, onCreate, form, mode
       } = this.props;
       const { getFieldDecorator } = form;
       let deal = this.props.deal || {}
+      let modeText = (mode === MODE.INSERT ? "Insert" : "Update");
       return (
         <Modal
           visible={visible}
-          title="Insert a new Deal"
-          okText="Insert"
+          title={modeText + " Deal" }
+          okText={modeText}
           onCancel={onCancel}
           onOk={onCreate}
         >
@@ -39,12 +33,18 @@ const DealForm = Form.create({ name: 'deal_insert_modal' })(
             <Form.Item label="Text">
               {getFieldDecorator('text', { initialValue: deal.text })(<Input type="textarea" />)}
             </Form.Item>
-            <Form.Item label="Publish Date">
-              {getFieldDecorator('publish_date', { initialValue: deal.publish_date ? deal.publish_date.substring(0, 10) : '' })(<Input type="date" />)}
-            </Form.Item>
-            <Form.Item label="End Date">
-              {getFieldDecorator('end_date', { initialValue: deal.end_date ? deal.end_date.substring(0, 10) : '' })(<Input type="date" />)}
-            </Form.Item>
+            <Row>
+              <Col span={10}>
+                <Form.Item label="Publish Date">
+                  {getFieldDecorator('publish_date', { initialValue: deal.publish_date ? deal.publish_date.substring(0, 10) : '' })(<Input type="date" />)}
+                </Form.Item>
+              </Col>
+              <Col span={10} style={{marginLeft: 10}}>
+                <Form.Item label="End Date">
+                  {getFieldDecorator('end_date', { initialValue: deal.end_date ? deal.end_date.substring(0, 10) : '' })(<Input type="date" />)}
+                </Form.Item>
+              </Col>
+            </Row>
             <Form.Item label="URL">
               {getFieldDecorator('url', { initialValue: deal.url })(<Input type="text" />)}
             </Form.Item>
@@ -64,11 +64,84 @@ const DealForm = Form.create({ name: 'deal_insert_modal' })(
   }
 );
 
+const BuyOptionForm = Form.create({ name: 'buy_option_modal' })(
+  // eslint-disable-next-line
+  class extends React.Component {
+    render() {
+      const {
+        visible, onCancel, onCreate, form, mode
+      } = this.props;
+      const { getFieldDecorator } = form;
+      let buyOption = this.props.buyOption || {}
+      let modeText = (mode === MODE.INSERT ? "Insert" : "Update");
+
+      return (
+        <Modal
+          visible={visible}
+          title={modeText + " Buy Option" }
+          okText={modeText}
+          onCancel={onCancel}
+          onOk={onCreate}
+        >
+          <Form layout="vertical">
+            <Form.Item label="Title">
+              {getFieldDecorator('title', {
+                initialValue: buyOption.title,
+                rules: [{ required: true, message: 'Please input the title of the buy option!' }],
+              })(
+                <Input />
+              )}
+            </Form.Item>
+            <Form.Item label="Text">
+              {getFieldDecorator('text', { initialValue: buyOption.text })(<Input type="textarea" />)}
+            </Form.Item>
+            <Row>
+              <Col span={8}>
+                <Form.Item label="Normal Price">
+                {getFieldDecorator('normal_price', { initialValue: buyOption.normal_price })(<InputNumber />)}
+              </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Form.Item label="Sale Price">
+                  {getFieldDecorator('sale_price', { initialValue: buyOption.sale_price })(<InputNumber />)}
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Form.Item label="Discount (%)">
+                  {getFieldDecorator('percentage_discount', { initialValue: buyOption.percentage_discount })(<InputNumber />)}
+                </Form.Item>
+              </Col>
+            </Row>
+            <Form.Item label="Quantity Cupom">
+              {getFieldDecorator('quantity_cupom', { initialValue: buyOption.quantity_cupom })(<InputNumber />)}
+            </Form.Item>
+            <Row>
+              <Col span={10} >
+                <Form.Item label="Start Date">
+                  {getFieldDecorator('start_date', { initialValue: buyOption.start_date ? buyOption.start_date.substring(0, 10) : '' })(<Input type="date" />)}
+                </Form.Item>
+              </Col>
+              <Col span={10} style={{marginLeft:10}}>
+                <Form.Item label="End Date">
+                  {getFieldDecorator('end_date', { initialValue: buyOption.end_date ? buyOption.end_date.substring(0, 10) : '' })(<Input type="date" />)}
+                </Form.Item>
+              </Col>
+            </Row>
+          </Form>
+        </Modal>
+      );
+    }
+  }
+);
+
 export default class Deal extends React.Component {
   state = {
     deals: [],
     deal: {},
-    visible: false,
+    buyOptions: [],
+    buyOption: {},
+    dealModalVisible: false,
+    buyOptionModalVisible: false,
     mode: MODE.INSERT
   }
 
@@ -79,6 +152,13 @@ export default class Deal extends React.Component {
           deals: res.data.deal 
         });
       })
+  }
+
+  async listBuyOptionsByDealId(dealId){
+    let buyOptions = [];
+    await axios.get(`${buyOptionUrl}list_by_deal?id=${dealId}`)
+      .then(res => buyOptions = res.data ? res.data.buy_option : []);
+    return buyOptions;
   }
 
   insertDeal(deal){
@@ -105,27 +185,65 @@ export default class Deal extends React.Component {
       })
   }
 
+  insertBuyOption(buyOption){
+    axios.post(buyOptionUrl, buyOption)
+      .then(() => {
+        message.success('Buy Option inserted!');
+      })
+  }
+
+  updateBuyOption(buyOption){
+    axios.put(buyOptionUrl, buyOption)
+      .then(() => {
+        message.success('Buy Option updated!');
+      })
+  }
+
+  deleteBuyOption(id){
+    axios.delete(`${buyOptionUrl}${id}`)
+      .then(() => {
+        message.success('Buy Option deleted!');
+      })
+  }
+
   componentDidMount() {
     this.getDeals();
   }
-  
-  showModal = (deal = {}, mode = MODE.INSERT) => {
+
+  hideModals(){
     this.setState({
-      deal,
-      visible: true,
-      mode
+      dealModalVisible: false,
+      buyOptionModalVisible: false
+    });
+  }
+  
+  showModalDeal = (params) => {
+    this.setState({
+      deal: params.deal || {},
+      dealModalVisible: true,
+      mode: params.mode || MODE.INSERT
+    });
+  }
+
+  showModalBuyOption = (params) => {
+    this.setState({
+      buyOption: params.buyOption || {}, 
+      buyOptionModalVisible: true,
+      mode: params.mode || MODE.INSERT,
+      deal: {id: params.dealId || null}
     });
   }
 
   handleCancel = () => {
-    this.setState({ visible: false });
+    this.hideModals();
   }
 
-  handleCreate = () => {
-    const form = this.formRef.props.form;
+  handleUpsertDeal = () => {
+    const form = this.dealFormRef.props.form;
     let { deal, mode } = this.state;
     form.validateFields((err, values) => {
       if (err) {
+        console.log(err);
         return;
       }
       form.resetFields();
@@ -136,31 +254,73 @@ export default class Deal extends React.Component {
           this.updateDeal(deal);
           break;
         case MODE.INSERT:
+        default:
           this.insertDeal(deal);
           break;
       }
 
-      this.setState({ 
-        visible: false
-      });
+      this.hideModals();
     });
   }
 
-  saveFormRef = (formRef) => {
-    this.formRef = formRef;
+  handleUpsertBuyOption = () => {
+    const form = this.buyOptionFormRef.props.form;
+    let { deal, buyOption, mode } = this.state;
+    form.validateFields((err, values) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      form.resetFields();
+
+      buyOption = {...buyOption, deal_id: deal.id, ...values};
+      switch(mode){
+        case MODE.UPDATE:
+          this.updateBuyOption(buyOption);
+          break;
+        case MODE.INSERT:
+        default:
+          this.insertBuyOption(buyOption);
+          break;
+      }
+
+      this.hideModals();
+    });
+  }
+
+  saveDealFormRef = (formRef) => {
+    this.dealFormRef = formRef;
+  }
+
+  saveBuyOptionFormRef = (formRef) => {
+    this.buyOptionFormRef = formRef;
   }
 
   render() {
-    const columns = [{
+    const buyOptionColumns = [
+      {
         title: 'Title',
         dataIndex: 'title',
         key: 'tite',
         width: '30%'
+      },{
+        title: 'Text',
+        dataIndex: 'text',
+        key: 'text',
+        width: '30%'
+      }
+    ];
+    
+    const dealColumns = [
+      {
+        title: 'Title',
+        dataIndex: 'title',
+        key: 'tite'
       }, {
         title: 'Text',
         dataIndex: 'text',
         key: 'text',
-        width: '45%'
+        width: '30%'
       },{
         title: 'Total Sold',
         key: 'total_sold',
@@ -179,28 +339,45 @@ export default class Deal extends React.Component {
         key: 'action',
         render: deal => (
           <span>
-            <a href="#" onClick={() => this.showModal(deal, MODE.UPDATE)} style={{ marginRight: 8 }}>Edit</a>
+            <a href="#" onClick={() => this.showModalDeal(deal, MODE.UPDATE)} style={{ marginRight: 8 }}>Edit</a>
             <Divider type="vertical" />
             <Popconfirm title="Are you sure delete this deal?" onConfirm={() => this.deleteDeal(deal.id)} okText="Yes" cancelText="No">
               <a href="#">Delete</a>
             </Popconfirm>
+            <Divider type="vertical" />
+            <Button icon="plus" type="primary" onClick={() => this.showModalBuyOption({dealId: deal.id})} style={{marginLeft: 10}}>Buy Options</Button>
           </span>
         ),
-        width: '10%'
-      }];
+        width: '15%'
+      }
+    ];
+
     return (
       <div>
         <DealForm
-          wrappedComponentRef={this.saveFormRef}
-          visible={this.state.visible}
+          wrappedComponentRef={this.saveDealFormRef}
+          visible={this.state.dealModalVisible}
           onCancel={this.handleCancel}
-          onCreate={this.handleCreate}
+          onCreate={this.handleUpsertDeal}
           deal={this.state.deal}
+          mode={this.state.mode}
+        />
+        <BuyOptionForm
+          wrappedComponentRef={this.saveBuyOptionFormRef}
+          visible={this.state.buyOptionModalVisible}
+          onCancel={this.handleCancel}
+          onCreate={this.handleUpsertBuyOption}
+          buyOption={this.state.buyOption}
+          mode={this.state.mode}
         />
         <Card
           title="Deals"
-          extra={<Button icon="plus" type="primary" onClick={() => this.showModal()}>Insert</Button>}>
-          <Table rowKey={'id'} columns={columns} dataSource={this.state.deals || []} />
+          extra={<Button icon="plus" type="primary" onClick={() => this.showModalDeal()}>Deal</Button>}>
+          <Table 
+            rowKey={'id'} 
+            columns={dealColumns} 
+            dataSource={this.state.deals || []} 
+          />
         </Card>
       </div> 
     )

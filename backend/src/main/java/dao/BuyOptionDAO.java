@@ -16,8 +16,7 @@ public class BuyOptionDAO extends DAO {
 		String sql = "DELETE FROM buy_option WHERE id = ?";
 		int affectedRows = 0;
 		try (Connection con = getConnection(); PreparedStatement pstmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);) {
-			int i = 1;
-			pstmt.setString(i++, id);
+			pstmt.setLong(1, Long.parseLong(id));
 
 			affectedRows = pstmt.executeUpdate();
 			if (affectedRows == 0) {
@@ -94,6 +93,23 @@ public class BuyOptionDAO extends DAO {
 		try (Connection con = getConnection(); Statement stmt = con.createStatement(); ResultSet rs = stmt.executeQuery(sql);) {
 			while (rs.next()) {
 				list.add(getBuyOption(rs));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+
+	public static List<BuyOption> listByDealId(String dealId) {
+		String sql = "SELECT * FROM buy_option WHERE deal_id = ?";
+		List<BuyOption> list = new ArrayList<BuyOption>();
+		try (Connection con = getConnection(); PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setLong(1, Long.parseLong(dealId));
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					list.add(getBuyOption(rs));
+				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

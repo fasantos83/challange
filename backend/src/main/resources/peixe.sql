@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS buy_option(
 	id	bigserial PRIMARY KEY,
 	title varchar,
 	normal_price numeric,
+	sale_price numeric,
 	percentage_discount numeric,
 	quantity_cupom bigint,
 	start_date timestamp,

@@ -5,9 +5,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import model.BuyOption;
 import model.Deal;
 
 public class DealDAO extends DAO {
@@ -38,13 +45,32 @@ public class DealDAO extends DAO {
 					deal = getDeal(rs);
 				}
 			}
-		} catch (SQLException e) {
+		} catch (SQLException | JSONException | ParseException e) {
 			e.printStackTrace();
 		}
 		return deal;
 	}
 
-	private static Deal getDeal(ResultSet rs) throws SQLException {
+	private static Deal getDeal(ResultSet rs) throws SQLException, JSONException, ParseException {
+		ArrayList<BuyOption> listBuyOption = new ArrayList<>();
+		JSONArray jArray = new JSONArray(rs.getString("buy_option"));
+		if (jArray != null) {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			for (int i = 0; i < jArray.length(); i++) {
+				JSONObject jObject = jArray.getJSONObject(i);
+				listBuyOption.add(new BuyOption(//
+						jObject.getLong("id"), //
+						jObject.getString("title"), //
+						jObject.getDouble("normal_price"), //
+						jObject.getDouble("sale_price"), //
+						jObject.getDouble("percentage_discount"), //
+						jObject.getLong("quantity_cupom"), //
+						dateFormat.parse(jObject.getString("start_date")), //
+						dateFormat.parse(jObject.getString("end_date")), //
+						jObject.getLong("deal_id")));
+			}
+		}
+
 		return new Deal(//
 				rs.getLong("id"), //
 				rs.getString("title"), //
@@ -54,7 +80,8 @@ public class DealDAO extends DAO {
 				rs.getDate("end_date"), //
 				rs.getString("url"), //
 				rs.getLong("total_sold"), //
-				rs.getLong("deal_type_id"));
+				rs.getLong("deal_type_id"), //
+				listBuyOption);
 	}
 
 	public static Deal insert(Deal deal) {
@@ -88,13 +115,17 @@ public class DealDAO extends DAO {
 	}
 
 	public static List<Deal> list() {
-		String sql = "SELECT * FROM deal";
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT d.*, COALESCE(json_agg(bo) FILTER (WHERE bo.deal_id IS NOT NULL), '[]') AS buy_option");
+		sql.append("FROM deal d");
+		sql.append("LEFT JOIN buy_option bo ON bo.deal_id = d.id");
+		sql.append("GROUP BY d.id");
 		List<Deal> list = new ArrayList<Deal>();
-		try (Connection con = getConnection(); Statement stmt = con.createStatement(); ResultSet rs = stmt.executeQuery(sql);) {
+		try (Connection con = getConnection(); Statement stmt = con.createStatement(); ResultSet rs = stmt.executeQuery(sql.toString());) {
 			while (rs.next()) {
 				list.add(getDeal(rs));
 			}
-		} catch (SQLException e) {
+		} catch (SQLException | JSONException | ParseException e) {
 			e.printStackTrace();
 		}
 		return list;

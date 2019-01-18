@@ -27,14 +27,11 @@ public class Deal {
 	private Long totalSold;
 	@XmlElement(name = "deal_type_id")
 	private Long dealTypeId;
+	@XmlElement(name = "buy_option")
 	private List<BuyOption> listBuyOption;
 
 	public Deal() {
-		this(null, "", "", new Date(), new Date(), new Date(), "", 0L, DealTypeEnum.LOCAL.getId());
-	}
-
-	public Deal(Long id, String title, String text, Date createDate, Date publishDate, Date endDate, String url, Long totalSold, Long dealTypeId) {
-		this(id, title, text, createDate, publishDate, endDate, url, totalSold, dealTypeId, new ArrayList<BuyOption>());
+		this(null, "", "", new Date(), new Date(), new Date(), "", 0L, DealTypeEnum.LOCAL.getId(), new ArrayList<BuyOption>());
 	}
 
 	public Deal(Long id, String title, String text, Date createDate, Date publishDate, Date endDate, String url, Long totalSold, Long dealTypeId, List<BuyOption> listBuyOption) {

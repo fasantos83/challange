@@ -2,16 +2,30 @@ package model;
 
 import java.util.Date;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name = "buy_option")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class BuyOption {
 
 	private Long id;
 	private String title;
+	@XmlElement(name = "normal_price")
 	private Double normalPrice;
+	@XmlElement(name = "sale_price")
 	private Double salePrice;
+	@XmlElement(name = "percentage_discount")
 	private Double percentageDiscount;
+	@XmlElement(name = "quantity_cupom")
 	private Long quantityCupom;
+	@XmlElement(name = "start_date")
 	private Date startDate;
+	@XmlElement(name = "end_date")
 	private Date endDate;
+	@XmlElement(name = "deal_id")
 	private Long dealId;
 
 	public BuyOption() {
