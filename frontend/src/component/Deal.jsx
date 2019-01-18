@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import { Card, Table, Divider, Button, Popconfirm, message, Modal, Form, Input, Radio, InputNumber, Row, Col } from 'antd';
+import { Card, Table, Divider, Button, Popconfirm, message, Modal, Form, Input, Radio, InputNumber, Row, Col} from 'antd';
 import { MODE, dealUrl, buyOptionUrl } from './constants';
 
 const DealForm = Form.create({ name: 'deal_modal' })(
@@ -92,9 +92,6 @@ const BuyOptionForm = Form.create({ name: 'buy_option_modal' })(
                 <Input />
               )}
             </Form.Item>
-            <Form.Item label="Text">
-              {getFieldDecorator('text', { initialValue: buyOption.text })(<Input type="textarea" />)}
-            </Form.Item>
             <Row>
               <Col span={8}>
                 <Form.Item label="Normal Price">
@@ -145,20 +142,29 @@ export default class Deal extends React.Component {
     mode: MODE.INSERT
   }
 
-  getDeals(){
-    axios.get(dealUrl)
-      .then(res => {
-        this.setState({ 
-          deals: res.data.deal 
-        });
-      })
+  async listBuyOptionById(deal){
+    let buyOptions = [];
+    await axios.get(`${buyOptionUrl}list_by_deal?id=${deal.id}`)
+      .then(res => buyOptions = res.data ? Array.isArray(res.data.buy_option) ? res.data.buy_option : [res.data.buy_option] : [])
+    return buyOptions;
   }
 
-  async listBuyOptionsByDealId(dealId){
-    let buyOptions = [];
-    await axios.get(`${buyOptionUrl}list_by_deal?id=${dealId}`)
-      .then(res => buyOptions = res.data ? res.data.buy_option : []);
-    return buyOptions;
+  async updateListBuyOption(dealId){
+    const { deals = [] } = this.state;
+    let deal = deals.find(d => dealId === d.id);
+    if(deal){
+      deal.buy_option = await this.listBuyOptionById(deal);
+      this.setState({ deals })
+    }
+  }
+
+  async getDeals(){
+    axios.get(dealUrl)
+      .then(async res => {
+        let deals = res.data.deal 
+        await deals.map(async deal => deal.buy_option = await this.listBuyOptionById(deal));
+        this.setState({ deals })
+      })
   }
 
   insertDeal(deal){
@@ -189,6 +195,8 @@ export default class Deal extends React.Component {
     axios.post(buyOptionUrl, buyOption)
       .then(() => {
         message.success('Buy Option inserted!');
+        this.updateListBuyOption(buyOption.deal_id);
+        
       })
   }
 
@@ -196,13 +204,15 @@ export default class Deal extends React.Component {
     axios.put(buyOptionUrl, buyOption)
       .then(() => {
         message.success('Buy Option updated!');
+        this.updateListBuyOption(buyOption.deal_id);
       })
   }
 
-  deleteBuyOption(id){
+  deleteBuyOption(id, dealId){
     axios.delete(`${buyOptionUrl}${id}`)
       .then(() => {
         message.success('Buy Option deleted!');
+        this.updateListBuyOption(dealId);
       })
   }
 
@@ -297,20 +307,6 @@ export default class Deal extends React.Component {
   }
 
   render() {
-    const buyOptionColumns = [
-      {
-        title: 'Title',
-        dataIndex: 'title',
-        key: 'tite',
-        width: '30%'
-      },{
-        title: 'Text',
-        dataIndex: 'text',
-        key: 'text',
-        width: '30%'
-      }
-    ];
-    
     const dealColumns = [
       {
         title: 'Title',
@@ -344,8 +340,44 @@ export default class Deal extends React.Component {
             <Popconfirm title="Are you sure delete this deal?" onConfirm={() => this.deleteDeal(deal.id)} okText="Yes" cancelText="No">
               <a href="#">Delete</a>
             </Popconfirm>
+          </span>
+        ),
+        width: '15%'
+      }
+    ];
+
+    const buyOptionColumns = [
+      {
+        title: 'Title',
+        dataIndex: 'title',
+        key: 'tite',
+        width: '30%'
+      },{
+        title: 'Normal Price',
+        dataIndex: 'normal_price',
+        key: 'normal_price',
+      },{
+        title: 'Sale Price',
+        dataIndex: 'sale_price',
+        key: 'sale_price',
+      },{
+        title: 'Discount (%)',
+        dataIndex: 'percentage_discount',
+        key: 'percentage_discount',
+      },{
+        title: 'Quantiy Cupom',
+        dataIndex: 'quantity_cupom',
+        key: 'quantity_cupom',
+      },{
+        title: 'Action',
+        key: 'action',
+        render: buyOption => (
+          <span>
+            <a href="#" onClick={() => this.showModalBuyOption(buyOption, MODE.UPDATE)} style={{ marginRight: 8 }}>Edit</a>
             <Divider type="vertical" />
-            <Button icon="plus" type="primary" onClick={() => this.showModalBuyOption({dealId: deal.id})} style={{marginLeft: 10}}>Buy Options</Button>
+            <Popconfirm title="Are you sure delete this buy option?" onConfirm={() => this.deleteBuyOption(buyOption.id, buyOption.deal_id)} okText="Yes" cancelText="No">
+              <a href="#">Delete</a>
+            </Popconfirm>
           </span>
         ),
         width: '15%'
@@ -376,7 +408,18 @@ export default class Deal extends React.Component {
           <Table 
             rowKey={'id'} 
             columns={dealColumns} 
-            dataSource={this.state.deals || []} 
+            dataSource={this.state.deals || []}
+            expandedRowRender={deal => 
+              <Card
+                title="Buy Options"
+                extra={<Button icon="plus" type="primary" onClick={() => this.showModalBuyOption({dealId: deal.id})} style={{marginLeft: 10}}>Buy Option</Button>}>
+                <Table 
+                  rowKey={'id'} 
+                  columns={buyOptionColumns} 
+                  dataSource={deal.buy_option || []}
+                />
+              </Card>
+            }
           />
         </Card>
       </div> 

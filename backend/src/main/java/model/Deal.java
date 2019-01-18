@@ -1,8 +1,6 @@
 package model;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -27,14 +25,12 @@ public class Deal {
 	private Long totalSold;
 	@XmlElement(name = "deal_type_id")
 	private Long dealTypeId;
-	@XmlElement(name = "buy_option")
-	private List<BuyOption> listBuyOption;
 
 	public Deal() {
-		this(null, "", "", new Date(), new Date(), new Date(), "", 0L, DealTypeEnum.LOCAL.getId(), new ArrayList<BuyOption>());
+		this(null, "", "", new Date(), new Date(), new Date(), "", 0L, DealTypeEnum.LOCAL.getId());
 	}
 
-	public Deal(Long id, String title, String text, Date createDate, Date publishDate, Date endDate, String url, Long totalSold, Long dealTypeId, List<BuyOption> listBuyOption) {
+	public Deal(Long id, String title, String text, Date createDate, Date publishDate, Date endDate, String url, Long totalSold, Long dealTypeId) {
 		super();
 		setId(id);
 		setTitle(title);
@@ -45,7 +41,6 @@ public class Deal {
 		setUrl(url);
 		setTotalSold(totalSold);
 		setDealTypeId(dealTypeId);
-		setListBuyOption(listBuyOption);
 	}
 
 	public Date getCreateDate() {
@@ -62,10 +57,6 @@ public class Deal {
 
 	public Long getId() {
 		return id;
-	}
-
-	public List<BuyOption> getListBuyOption() {
-		return listBuyOption;
 	}
 
 	public Date getPublishDate() {
@@ -102,10 +93,6 @@ public class Deal {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public void setListBuyOption(List<BuyOption> listBuyOption) {
-		this.listBuyOption = listBuyOption;
 	}
 
 	public void setPublishDate(Date publishDate) {
