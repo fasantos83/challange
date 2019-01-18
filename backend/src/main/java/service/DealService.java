@@ -11,6 +11,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import dao.BuyOptionDAO;
 import dao.DealDAO;
 import model.Deal;
 
@@ -21,6 +22,7 @@ public class DealService {
 	@Path("/{id}")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public void delete(@PathParam("id") String id) {
+		BuyOptionDAO.deleteByDealId(id);
 		DealDAO.delete(id);
 	}
 

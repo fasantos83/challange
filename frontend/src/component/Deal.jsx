@@ -131,6 +131,38 @@ const BuyOptionForm = Form.create({ name: 'buy_option_modal' })(
   }
 );
 
+const SellUnitForm = Form.create({ name: 'sell_unit_modal' })(
+  // eslint-disable-next-line
+  class extends React.Component {
+    render() {
+      const {
+        visible, onCancel, onOK, form
+      } = this.props;
+      const { getFieldDecorator } = form;
+      let buyOption = this.props.buyOption || {}
+      
+      return (
+        <Modal
+          visible={visible}
+          title={"Sell Unit of " + buyOption.title}
+          okText="Sell"
+          onCancel={onCancel}
+          onOk={onOK}
+        >
+          <Form layout="vertical">
+            <Form.Item label={"Quantity (max: "+buyOption.quantity_cupom+")"}>
+              {getFieldDecorator('quantity', { 
+                initialValue: 0,
+                rules: [{ required: true, message: 'Please select a quantity!' }]
+              })(<InputNumber/>)}
+            </Form.Item>
+          </Form>
+        </Modal>
+      );
+    }
+  }
+);
+
 export default class Deal extends React.Component {
   state = {
     deals: [],
@@ -139,6 +171,7 @@ export default class Deal extends React.Component {
     buyOption: {},
     dealModalVisible: false,
     buyOptionModalVisible: false,
+    sellUnitModalVisible: false,
     mode: MODE.INSERT
   }
 
@@ -161,7 +194,7 @@ export default class Deal extends React.Component {
   async getDeals(){
     axios.get(dealUrl)
       .then(async res => {
-        let deals = res.data.deal 
+        let deals = res.data ? Array.isArray(res.data.deal) ? res.data.deal : [res.data.deal] : [] 
         await deals.map(async deal => deal.buy_option = await this.listBuyOptionById(deal));
         this.setState({ deals })
       })
@@ -216,6 +249,22 @@ export default class Deal extends React.Component {
       })
   }
 
+  sellUnit(buyOption, quantity){
+    let { deals = [] } = this.state;
+    let deal = deals.find(d => buyOption.deal_id === d.id);
+
+    buyOption.quantity_cupom -= Number(quantity);
+    axios.put(buyOptionUrl, buyOption)
+      .then(() => {
+        deal.total_sold = Number(deal.total_sold) + Number(quantity) + "";
+        axios.put(dealUrl, deal)
+          .then(() => {
+            message.success(quantity + ' option' + (quantity > 1 ? '(s)' : '')  + ' sold!');
+            this.updateListBuyOption(deal.id);
+          })
+      })
+  }
+
   componentDidMount() {
     this.getDeals();
   }
@@ -223,11 +272,12 @@ export default class Deal extends React.Component {
   hideModals(){
     this.setState({
       dealModalVisible: false,
-      buyOptionModalVisible: false
+      buyOptionModalVisible: false,
+      sellUnitModalVisible: false
     });
   }
   
-  showModalDeal = (params) => {
+  showModalDeal = (params = {}) => {
     this.setState({
       deal: params.deal || {},
       dealModalVisible: true,
@@ -241,6 +291,13 @@ export default class Deal extends React.Component {
       buyOptionModalVisible: true,
       mode: params.mode || MODE.INSERT,
       deal: {id: params.dealId || null}
+    });
+  }
+
+  showModalSellUnit = (buyOption) => {
+    this.setState({
+      buyOption: buyOption || {}, 
+      sellUnitModalVisible: true
     });
   }
 
@@ -298,12 +355,33 @@ export default class Deal extends React.Component {
     });
   }
 
+  handleSellUnit = () => {
+    const form = this.sellUnitFormRef.props.form;
+    let { buyOption } = this.state;
+    form.validateFields((err, values) => {
+      let valueMoreMax = Number(buyOption.quantity_cupom) < values.quantity;
+      let valueLessMin = values.quantity < 0;
+      if (err || valueMoreMax || valueLessMin) {
+        if(valueMoreMax) message.error("Value must be less than " + Number(buyOption.quantity_cupom) + "!");
+        if(valueLessMin) message.error("Value must be greater than 0!");
+        return;
+      }
+      form.resetFields();
+      this.sellUnit(buyOption, values.quantity);
+      this.hideModals();
+    });
+  }
+
   saveDealFormRef = (formRef) => {
     this.dealFormRef = formRef;
   }
 
   saveBuyOptionFormRef = (formRef) => {
     this.buyOptionFormRef = formRef;
+  }
+
+  saveSellUnitFormRef = (formRef) => {
+    this.sellUnitFormRef = formRef;
   }
 
   render() {
@@ -335,10 +413,10 @@ export default class Deal extends React.Component {
         key: 'action',
         render: deal => (
           <span>
-            <a href="#" onClick={() => this.showModalDeal({deal, mode: MODE.UPDATE})} style={{ marginRight: 8 }}>Edit</a>
+            <Button type="primary" shape="circle" icon="edit" onClick={() => this.showModalDeal({deal, mode: MODE.UPDATE})}/>
             <Divider type="vertical" />
             <Popconfirm title="Are you sure delete this deal?" onConfirm={() => this.deleteDeal(deal.id)} okText="Yes" cancelText="No">
-              <a href="#">Delete</a>
+              <Button type="primary" shape="circle" icon="delete"/>
             </Popconfirm>
           </span>
         ),
@@ -373,10 +451,12 @@ export default class Deal extends React.Component {
         key: 'action',
         render: buyOption => (
           <span>
-            <a href="#" onClick={() => this.showModalBuyOption({buyOption, mode: MODE.UPDATE, dealId: buyOption.deal_id})} style={{ marginRight: 8 }}>Edit</a>
+            <Button type="primary" shape="circle" icon="shopping-cart" onClick={() => this.showModalSellUnit(buyOption)}/>
+            <Divider type="vertical" />
+            <Button type="primary" shape="circle" icon="edit" onClick={() => this.showModalBuyOption({buyOption, mode: MODE.UPDATE, dealId: buyOption.deal_id})}/>
             <Divider type="vertical" />
             <Popconfirm title="Are you sure delete this buy option?" onConfirm={() => this.deleteBuyOption(buyOption.id, buyOption.deal_id)} okText="Yes" cancelText="No">
-              <a href="#">Delete</a>
+              <Button type="primary" shape="circle" icon="delete"/>
             </Popconfirm>
           </span>
         ),
@@ -401,6 +481,13 @@ export default class Deal extends React.Component {
           onCreate={this.handleUpsertBuyOption}
           buyOption={this.state.buyOption}
           mode={this.state.mode}
+        />
+        <SellUnitForm
+          wrappedComponentRef={this.saveSellUnitFormRef}
+          visible={this.state.sellUnitModalVisible}
+          onCancel={this.handleCancel}
+          onOK={this.handleSellUnit}
+          buyOption={this.state.buyOption}
         />
         <Card
           title="Deals"

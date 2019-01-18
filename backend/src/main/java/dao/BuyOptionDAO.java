@@ -28,6 +28,22 @@ public class BuyOptionDAO extends DAO {
 		return affectedRows;
 	}
 
+	public static Integer deleteByDealId(String dealId) {
+		String sql = "DELETE FROM buy_option WHERE deal_id = ?";
+		int affectedRows = 0;
+		try (Connection con = getConnection(); PreparedStatement pstmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);) {
+			pstmt.setLong(1, Long.parseLong(dealId));
+
+			affectedRows = pstmt.executeUpdate();
+			if (affectedRows == 0) {
+				throw new SQLException("Deleting buy option failed, no rows affected.");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return affectedRows;
+	}
+
 	public static BuyOption get(String id) {
 		String sql = "SELECT * FROM buy_option WHERE id = ?";
 		BuyOption buyOption = new BuyOption();
