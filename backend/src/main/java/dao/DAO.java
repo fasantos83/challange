@@ -10,7 +10,7 @@ public class DAO {
 		String driver = "org.postgresql.Driver";
 		String user = "postgres";
 		String senha = "root";
-		String url = "jdbc:postgresql://localhost:5432/peixe";
+		String url = "jdbc:postgresql://localhost:5432/challenge";
 		Connection con = null;
 		try {
 			Class.forName(driver);
