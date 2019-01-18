@@ -35,9 +35,6 @@ public class BuyOptionDAO extends DAO {
 			pstmt.setLong(1, Long.parseLong(dealId));
 
 			affectedRows = pstmt.executeUpdate();
-			if (affectedRows == 0) {
-				throw new SQLException("Deleting buy option failed, no rows affected.");
-			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

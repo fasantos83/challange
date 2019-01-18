@@ -21,9 +21,9 @@ public class DealService {
 	@DELETE
 	@Path("/{id}")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public void delete(@PathParam("id") String id) {
+	public Integer delete(@PathParam("id") String id) {
 		BuyOptionDAO.deleteByDealId(id);
-		DealDAO.delete(id);
+		return DealDAO.delete(id);
 	}
 
 	@GET
