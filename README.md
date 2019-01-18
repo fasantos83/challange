@@ -5,12 +5,13 @@
   * PostgreSQL 11
   * Tomcat 9
   * Maven
+  * Rest Jersey
 * Frontend:
   * node.js 10
   * react 16
   * axios
 
-## Setup:
+## Setup
 * BD:
   * user: postgres
   * password: root 
