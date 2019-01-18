@@ -335,7 +335,7 @@ export default class Deal extends React.Component {
         key: 'action',
         render: deal => (
           <span>
-            <a href="#" onClick={() => this.showModalDeal(deal, MODE.UPDATE)} style={{ marginRight: 8 }}>Edit</a>
+            <a href="#" onClick={() => this.showModalDeal({deal, mode: MODE.UPDATE})} style={{ marginRight: 8 }}>Edit</a>
             <Divider type="vertical" />
             <Popconfirm title="Are you sure delete this deal?" onConfirm={() => this.deleteDeal(deal.id)} okText="Yes" cancelText="No">
               <a href="#">Delete</a>
@@ -373,7 +373,7 @@ export default class Deal extends React.Component {
         key: 'action',
         render: buyOption => (
           <span>
-            <a href="#" onClick={() => this.showModalBuyOption(buyOption, MODE.UPDATE)} style={{ marginRight: 8 }}>Edit</a>
+            <a href="#" onClick={() => this.showModalBuyOption({buyOption, mode: MODE.UPDATE, dealId: buyOption.deal_id})} style={{ marginRight: 8 }}>Edit</a>
             <Divider type="vertical" />
             <Popconfirm title="Are you sure delete this buy option?" onConfirm={() => this.deleteBuyOption(buyOption.id, buyOption.deal_id)} okText="Yes" cancelText="No">
               <a href="#">Delete</a>
